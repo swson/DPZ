@@ -146,9 +146,11 @@ def main():
     # add optional argument
     #parser.add_argument("-d", "--double", help = "double precision")
     parser.add_argument('file', type=argparse.FileType('r'))
+    parser.add_argument('dimension', type=int, nargs='+', help='input data dimension')
 
     # read arguments from command line
     args = parser.parse_args()
+    #print(args.dimension)
         
     ## Compression
     #filename='CESM-ATM-tylor/1800x3600/CLDLOW_1_1800_3600.dat'# 2D: 1800*3600
@@ -160,9 +162,9 @@ def main():
     ori=x
 
     # Step 2: Set Parameter
-    tot_blocks=1800
-    block_size=3600
-    bin_number=255 # e.g., 65535 
+    tot_blocks = args.dimension[0] # 1800
+    block_size = args.dimension[1] # 3600 
+    bin_number = 255 # e.g., 65535 
     n_bytes=1 # e.g.,2
     precision=4 # float
     error_bound=1e-3 # e.g.,1e-4
