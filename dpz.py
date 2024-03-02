@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from array import array
 import zlib
 import joblib
+import argparse
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -139,14 +140,20 @@ def psnr(ori,reconstruct):
 # main body of code that calls other functions and methods
 import sys
 def main():
-    args = sys.argv[1:]
+    # init parse
+    parser = argparse.ArgumentParser()
 
-    ## TO-DO: check for the argument, print help if no arg provided
-    
+    # add optional argument
+    #parser.add_argument("-d", "--double", help = "double precision")
+    parser.add_argument('file', type=argparse.FileType('r'))
+
+    # read arguments from command line
+    args = parser.parse_args()
+        
     ## Compression
     #filename='CESM-ATM-tylor/1800x3600/CLDLOW_1_1800_3600.dat'# 2D: 1800*3600
 
-    filename = args[0]
+    filename = args.file
     print('reading data', filename, '...')
     # Step 1: Read data
     x = np.fromfile(filename, dtype='float32') #float
@@ -155,10 +162,10 @@ def main():
     # Step 2: Set Parameter
     tot_blocks=1800
     block_size=3600
-    bin_number=255 #e.g.,65535 
-    n_bytes=1 #e.g.,2
-    precision=4 #float
-    error_bound=1e-3 #e.g.,1e-4
+    bin_number=255 # e.g., 65535 
+    n_bytes=1 # e.g.,2
+    precision=4 # float
+    error_bound=1e-3 # e.g.,1e-4
     tot_var_exp=0.9999 # 99.9%:"three-nine"; 99.999999%:"eight-nine"
     
     # Step 3: DCT with decomposition
