@@ -144,13 +144,14 @@ def main():
     parser = argparse.ArgumentParser()
 
     # add optional argument
-    #parser.add_argument("-d", "--double", help = "double precision")
+    parser.add_argument('-d', '--double',  help='double precision', action=argparse.BooleanOptionalAction, required=False) # make it -f/-d required option? Python 3.9+
     parser.add_argument('file', type=argparse.FileType('r'))
     parser.add_argument('dimension', type=int, nargs='+', help='input data dimension')
 
     # read arguments from command line
     args = parser.parse_args()
-    #print(args.dimension)
+    #print(args.double)  # debug
+    #print(args.dimension) # debug
         
     ## Compression
     #filename='CESM-ATM-tylor/1800x3600/CLDLOW_1_1800_3600.dat'# 2D: 1800*3600
@@ -158,7 +159,11 @@ def main():
     filename = args.file
     print('reading data', filename, '...')
     # Step 1: Read data
-    x = np.fromfile(filename, dtype='float32') #float
+    dt = 'float32' # float (default)
+    if args.double:
+        print('dtype is double')
+        dt = 'float64' # double
+    x = np.fromfile(filename, dtype=dt)
     ori=x
 
     # Step 2: Set Parameter
