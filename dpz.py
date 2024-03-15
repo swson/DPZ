@@ -36,11 +36,11 @@ from kneed import KneeLocator
 
 # DCT (2D)
 def dct_data(data,tot_blocks):
-    new=[]
+    new = []
     for i in range(tot_blocks):
-        new.append(dct(data.T.loc[i].values,norm='ortho'))
-    row_block_dct=pd.DataFrame(new)
-    row_block_dct_t=row_block_dct.T
+        new.append(dct(data.T.loc[i].values, norm='ortho'))
+    row_block_dct = pd.DataFrame(new)
+    row_block_dct_t = row_block_dct.T
     return row_block_dct_t
     # x_dct=dct(y_df.T,norm='ortho')
     # x_dct_df=pd.DataFrame(x_dct.T)
@@ -48,21 +48,21 @@ def dct_data(data,tot_blocks):
 
 
 # iDCT (2D)
-def idct_data(data,tot_blocks):
-    new=[]
+def idct_data(data, tot_blocks):
+    new = []
     for i in range(tot_blocks):
-        new.append(idct(data.T.loc[i].values,norm='ortho'))
-    row_block_idct=pd.DataFrame(new)
-    row_block_idct_t=row_block_idct.T
+        new.append(idct(data.T.loc[i].values, norm='ortho'))
+    row_block_idct = pd.DataFrame(new)
+    row_block_idct_t = row_block_idct.T
     return row_block_idct_t
     # x_idct=idct(xx.T,norm='ortho')
     # x_idct_t=x_idct.T
 
 # PCA with standardization(Optional approach)
 def pca_func(data,k):
-    scaler=StandardScaler()
+    scaler = StandardScaler()
     scaler.fit(data)
-    scaled_data=scaler.transform(data)
+    scaled_data = scaler.transform(data)
     X_train = scaled_data
     pca = PCA(n_components=k)
     pca.fit(X_train)
@@ -79,14 +79,14 @@ def pca_func(data,k):
 
 # Quantization
 def quantization(data_quan,bin_number, error_bound):
-  gb_up=bin_number*error_bound
-  gb_lower=(-1)*bin_number*error_bound
-  gb_bin=np.linspace(gb_lower, gb_up, bin_number+1)
+  gb_up = bin_number*error_bound
+  gb_lower = (-1)*bin_number*error_bound
+  gb_bin = np.linspace(gb_lower, gb_up, bin_number+1)
   # gb_bin_avg=[]
   # for u in range(0,len(gb_bin)-1):
   #   gb_bin_avg.append((gb_bin[u]+gb_bin[u+1])/2)
-  save_exact=[] 
-  index_exact=[]
+  save_exact = [] 
+  index_exact = []
   for x in range(0,len(data_quan)):
     if data_quan[x]>gb_bin[-1] or data_quan[x]<=gb_bin[0]:
         index_exact.append(bin_number)
@@ -94,47 +94,47 @@ def quantization(data_quan,bin_number, error_bound):
     else:
         left,right=0,len(gb_bin)-1
         while left<right-1:
-          mid=(left+right)//2
-          if data_quan[x]<gb_bin[mid]:
-            right=mid
-          elif data_quan[x]>gb_bin[mid]:
-            left=mid
+          mid = (left+right)//2
+          if data_quan[x] < gb_bin[mid]:
+            right = mid
+          elif data_quan[x] > gb_bin[mid]:
+            left = mid
           else:
             break
         if abs(data_quan[x]-(gb_bin[mid]-error_bound))<=abs((gb_bin[mid]+error_bound)-data_quan[x]):
           index_exact.append(mid-1)
         else:
           index_exact.append(mid)
-  return save_exact,index_exact#,gb_bin_avg,gb_bin
+  return save_exact,index_exact #,gb_bin_avg,gb_bin
   
   
-def inverse_quantization(index,save_ex,bin_number, error_bound):
-  recons=[]
-  ind=0
-  gb_up=bin_number*error_bound
-  gb_lower=(-1)*bin_number*error_bound
-  gb_bin=np.linspace(gb_lower, gb_up, bin_number+1)
+def inverse_quantization(index, save_ex, bin_number, error_bound):
+  recons = []
+  ind = 0
+  gb_up = bin_number*error_bound
+  gb_lower = (-1)*bin_number*error_bound
+  gb_bin = np.linspace(gb_lower, gb_up, bin_number+1)
   for i in range(len(index)):
-    if index[i]==bin_number:
+    if index[i] == bin_number:
       recons.append(save_ex[ind])
-      ind+=1
+      ind += 1
     else:
       recons.append(gb_bin[index[i]])
   return recons
 
 
 # Evaluation
-def rel_error(ori,reconstruct):
-    max_abs_error=abs(ori-reconstruct).max()
-    data_range=np.max(np.max(ori))-np.min(np.min(ori)) #max(ori)-min(ori)
-    rel_error=max_abs_error/data_range
+def rel_error(ori, reconstruct):
+    max_abs_error = abs(ori-reconstruct).max()
+    data_range = np.max(np.max(ori))-np.min(np.min(ori)) #max(ori)-min(ori)
+    rel_error = max_abs_error/data_range
     return rel_error
     
 import math
-def psnr(ori,reconstruct):
+def psnr(ori, reconstruct):
     mse = ((ori - reconstruct) ** 2).mean().mean()
-    data_range=np.max(np.max(ori))-np.min(np.min(ori)) #max(ori)-min(ori)
-    psnr_res=20*(math.log10(data_range))-10*(math.log10(mse))
+    data_range = np.max(np.max(ori))-np.min(np.min(ori)) #max(ori)-min(ori)
+    psnr_res = 20*(math.log10(data_range))-10*(math.log10(mse))
     return psnr_res
 
 # main body of code that calls other functions and methods
@@ -144,7 +144,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     # add optional argument
-    parser.add_argument('-d', '--double',  help='double precision', action=argparse.BooleanOptionalAction, required=False) # make it -f/-d required option? Python 3.9+
+    parser.add_argument('-d', '--double', help='double precision', action=argparse.BooleanOptionalAction, required=False) # make it -f/-d required option? Python 3.9+
     parser.add_argument('file', type=argparse.FileType('r'))
     parser.add_argument('dimension', type=int, nargs='+', help='input data dimension')
 
@@ -170,24 +170,24 @@ def main():
     tot_blocks = args.dimension[0] # 1800
     block_size = args.dimension[1] # 3600 
     bin_number = 255 # e.g., 65535 
-    n_bytes=1 # e.g.,2
-    precision=4 # float
-    error_bound=1e-3 # e.g.,1e-4
-    tot_var_exp=0.9999 # 99.9%:"three-nine"; 99.999999%:"eight-nine"
+    n_bytes = 1 # e.g.,2
+    precision = 4 # float
+    error_bound = 1e-3 # e.g.,1e-4
+    tot_var_exp = 0.9999 # 99.9%:"three-nine"; 99.999999%:"eight-nine"
     
     # Step 3: DCT with decomposition
-    y=x.reshape((block_size,tot_blocks))
-    ori_2d=y
-    y_df=pd.DataFrame(y)
-    dctdata=dct_data(y_df,tot_blocks)
+    y=x.reshape((block_size, tot_blocks))
+    ori_2d = y
+    y_df = pd.DataFrame(y)
+    dctdata = dct_data(y_df, tot_blocks)
     
     # Step 4: k-PCA:
     # Method 2: total variance explained 
-    k=tot_blocks
-    exp_var_cumul=pca_func(dctdata,k)
-    exp_cum=list(exp_var_cumul)
+    k = tot_blocks
+    exp_var_cumul = pca_func(dctdata, k)
+    exp_cum = list(exp_var_cumul)
     num_k = next(s for s, val in enumerate(exp_cum) if val > tot_var_exp) 
-    print("The number of k needed:",num_k)
+    print("The number of k needed:", num_k)
     
     # # Method 1: knee-point detection
     # ind_rand=[i for i in range(0,tot_blocks)]
@@ -200,9 +200,9 @@ def main():
     pca = PCA(n_components=num_k)
     pca.fit(dctdata)
     X_train_pca = pca.transform(dctdata)
-    pca_estimator=pca
-    X_train_pca_1d=X_train_pca.reshape((-1,1))
-    data_quan=X_train_pca_1d
+    pca_estimator = pca
+    X_train_pca_1d = X_train_pca.reshape((-1, 1))
+    data_quan = X_train_pca_1d
     
     ## pca with standardization
     # scaler=StandardScaler()
@@ -217,18 +217,18 @@ def main():
     # pk.dump(scaler, open('scaler.pkl', 'wb'))
     
     # Step 6: Quantization
-    save_exact,index_exact=quantization(data_quan,bin_number, error_bound)
+    save_exact,index_exact = quantization(data_quan, bin_number, error_bound)
     
     # Step 7: Encoding
     pk.dump(pca_estimator, open("pca.pkl","wb"))
     
     output_file = open('save_exact.bin', 'wb')
-    float_array = array('f', save_exact) #single-precision(f)
+    float_array = array('f', save_exact) # single-precision(f)
     float_array.tofile(output_file)
     output_file.close()
     
     output_file = open('index_exact.bin', 'wb')
-    float_array = array('H',index_exact) #unsigned char(B) or unsigned shor (H)
+    float_array = array('H', index_exact) # unsigned char(B) or unsigned shor (H)
     float_array.tofile(output_file)
     output_file.close()
     
@@ -245,28 +245,28 @@ def main():
     ## Decompression
     
     # Step 1: Decode, set parameter
-    filename='./index_exact.bin'
+    filename = './index_exact.bin'
     index_recons = np.fromfile(filename, dtype='H') #unsigned char(B) or unsigned shor (H)
-    filename='./save_exact.bin'
+    filename = './save_exact.bin'
     save_recons = np.fromfile(filename, dtype='float32') #float32
-    pca_reload = pk.load(open("pca.pkl",'rb'))
+    pca_reload = pk.load(open("pca.pkl", 'rb'))
     #sc=pk.load('std_scaler.bin') #scaler
     recons=[]
     
     # Step 2: Inverse Quantization
-    recons=inverse_quantization(index_recons,save_recons,bin_number, error_bound)
-    X_train_pca_compressed=np.array(recons).reshape((-1,num_k))
+    recons = inverse_quantization(index_recons, save_recons, bin_number, error_bound)
+    X_train_pca_compressed = np.array(recons).reshape((-1,num_k))
     
     # Step 3: Inverse PCA & DCT
-    X_projected_quan=pca_reload.inverse_transform(X_train_pca_compressed)
+    X_projected_quan = pca_reload.inverse_transform(X_train_pca_compressed)
     # if use Standardize PCA, include:
     # X_projected_quan = sc.inverse_transform(X_projected_quan)
-    x_ipca_df=pd.DataFrame(X_projected_quan)
-    recon_data=idct_data(x_ipca_df,tot_blocks)
-    decompressed=recon_data.to_numpy().flatten()
+    x_ipca_df = pd.DataFrame(X_projected_quan)
+    recon_data = idct_data(x_ipca_df,tot_blocks)
+    decompressed = recon_data.to_numpy().flatten()
     
     ## PSNR
-    print("PSNR:",psnr(ori,decompressed))
+    print("PSNR:", psnr(ori,decompressed))
 
     ## Visualization 2D dataset
     from matplotlib.ticker import FuncFormatter
@@ -277,7 +277,7 @@ def main():
             return str(int(x))
         else:
             return str(x)
-        fig,ax=plt.subplots(figsize=(8,6))
+        fig,ax = plt.subplots(figsize=(8,6))
         rcParams['font.family'] = "Arial"# sans-serif
         ax.tick_params(labelsize=22)
         ax.ticklabel_format(axis='x')
@@ -294,11 +294,11 @@ def main():
         x = np.linspace(1, 1800,1800)
         y = np.linspace(1, 3600, 3600)
         X, Y = np.meshgrid(x, y)
-        Z=ori_2d #error_2d
+        Z = ori_2d #error_2d
         mesh = ax.pcolormesh(X,Y, Z, cmap = 'RdGy')
         #mesh.set_clim(-0.01,0.01)
         
-        cb=fig.colorbar(mesh,ax=ax)
+        cb = fig.colorbar(mesh,ax=ax)
         cb.ax.tick_params(labelsize=22)
         # custom_lines = [#mpatches.Patch(color='orangered',label='Abnormal'),
         #                #mpatches.Patch(color='steelblue',label='Normal'),
@@ -307,14 +307,14 @@ def main():
         #                 #Line2D([0], [0], color='k',linestyle='--',label='Local maxima')
         #                ]
         # ax.legend(handles=custom_lines,loc="upper right",prop={'size': 48},frameon=False)
-        ax.yaxis.set_label_coords(-0.13,0.5)
+        ax.yaxis.set_label_coords(-0.13, 0.5)
         #plt.savefig('ori2d.png', format='png',dpi=600)
         plt.show()
         
         ## Visualization compression error
-        error=pd.DataFrame((ori-decompressed).T)
-        error_2d=error.to_numpy().reshape((block_size,tot_blocks))
-        fig,ax=plt.subplots(figsize=(8,6))
+        error = pd.DataFrame((ori-decompressed).T)
+        error_2d = error.to_numpy().reshape((block_size, tot_blocks))
+        fig,ax = plt.subplots(figsize=(8,6))
         rcParams['font.family'] = "Arial"# sans-serif
         ax.tick_params(labelsize=22)
         ax.ticklabel_format(axis='x')
@@ -323,11 +323,11 @@ def main():
         x = np.linspace(1, 1800,1800)
         y = np.linspace(1, 3600, 3600)
         X, Y = np.meshgrid(x, y)
-        Z=error_2d
+        Z = error_2d
         mesh = ax.pcolormesh(X,Y, Z, cmap = 'RdGy')
         mesh.set_clim(-0.01,0.01)
         
-        cb=fig.colorbar(mesh,ax=ax)
+        cb = fig.colorbar(mesh,ax=ax)
         cb.ax.tick_params(labelsize=22)
         ax.yaxis.set_label_coords(-0.13,0.5)
         #plt.savefig('err.png', format='png',dpi=600)
